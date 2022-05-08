@@ -23,7 +23,7 @@ const ShadowBox = ({ shadow }) => (
                 color: 'grey.800'
             }}
         >
-            <Box sx={{ color: 'inherit' }}>boxShadow: {shadow}</Box>
+            <Box sx={{ color: 'inherit' }}>Bonjour: {shadow}</Box>
         </Box>
     </Card>
 );

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import { Box, Drawer, useMediaQuery } from '@mui/material';
+import {Avatar, Box, ButtonBase, Drawer, Typography, useMediaQuery} from '@mui/material';
 
 // third-party
 import PerfectScrollbar from 'react-perfect-scrollbar';
@@ -13,12 +13,21 @@ import MenuList from './MenuList';
 import LogoSection from '../LogoSection';
 import MenuCard from './MenuCard';
 import { drawerWidth } from 'store/constant';
+import {grey} from "@mui/material/colors";
+import {useIsAuthenticated, useSignOut} from "react-auth-kit";
+import {useNavigate} from "react-router-dom";
+import LoginIcon from '@mui/icons-material/Login';
+
 
 // ==============================|| SIDEBAR DRAWER ||============================== //
 
 const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
     const theme = useTheme();
     const matchUpMd = useMediaQuery(theme.breakpoints.up('md'));
+    const signOut = useSignOut()
+    const auth = useIsAuthenticated()
+
+    let navigate = useNavigate();
 
     const drawer = (
         <>
@@ -37,12 +46,98 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
                     }}
                 >
                     <MenuList />
+                    {auth() ?<ButtonBase onClick={signOut} sx={{borderRadius: '12px',marginLeft:3,marginBottom:3 ,overflow: 'hidden'}}>
+                            <Avatar
+                                variant="square"
+                                sx={{
+                                    width:200,
+                                    height:35,
+                                    transition: 'all .2s ease-in-out',
+                                    color: theme.palette.secondary.dark,
+                                    '&:hover': {
+                                        background: "red",
+                                        color: theme.palette.secondary.light
+                                    }
+                                }}
+
+                                color="inherit"
+                            >
+                                <Typography>Deconnexion</Typography><LoginIcon stroke={1.5} size="1.3rem"/>
+
+                            </Avatar>
+                        </ButtonBase>
+
+                        :
+                        <ButtonBase sx={{borderRadius: '12px',marginLeft:3, marginBottom:3 , overflow: 'hidden'}}>
+                            <Avatar
+                                variant="rounded"
+                                sx={{
+                                    width:200,
+                                    height:35,
+                                    transition: 'all .2s ease-in-out',
+                                    color: theme.palette.secondary.dark,
+                                    '&:hover': {
+                                        background: theme.palette.secondary.dark,
+                                        color: theme.palette.secondary.light
+                                    }
+                                }}
+                                onClick={() => navigate(`/login`)}
+                                color="inherit"
+                            >
+                                <Typography>Connexion</Typography><LoginIcon stroke={1.5} size="1.3rem"/>
+
+                            </Avatar>
+                        </ButtonBase>
+                    }
                     <MenuCard />
                 </PerfectScrollbar>
             </BrowserView>
             <MobileView>
                 <Box sx={{ px: 2 }}>
                     <MenuList />
+                    {auth() ?<ButtonBase onClick={signOut} sx={{borderRadius: '12px',marginLeft:3,marginBottom:3 ,overflow: 'hidden'}}>
+                            <Avatar
+                                variant="square"
+                                sx={{
+                                    width:200,
+                                    height:35,
+                                    transition: 'all .2s ease-in-out',
+                                    color: theme.palette.secondary.dark,
+                                    '&:hover': {
+                                        background: "red",
+                                        color: theme.palette.secondary.light
+                                    }
+                                }}
+
+                                color="inherit"
+                            >
+                                <Typography>Deconnexion</Typography><LoginIcon stroke={1.5} size="1.3rem"/>
+
+                            </Avatar>
+                        </ButtonBase>
+
+                        :
+                        <ButtonBase sx={{borderRadius: '12px',marginLeft:3, marginBottom:3 , overflow: 'hidden'}}>
+                            <Avatar
+                                variant="rounded"
+                                sx={{
+                                    width:200,
+                                    height:35,
+                                    transition: 'all .2s ease-in-out',
+                                    color: theme.palette.secondary.dark,
+                                    '&:hover': {
+                                        background: theme.palette.secondary.dark,
+                                        color: theme.palette.secondary.light
+                                    }
+                                }}
+                                onClick={() => navigate(`/login`)}
+                                color="inherit"
+                            >
+                                <Typography>Connexion</Typography><LoginIcon stroke={1.5} size="1.3rem"/>
+
+                            </Avatar>
+                        </ButtonBase>
+                    }
                     <MenuCard />
                 </Box>
             </MobileView>
@@ -62,8 +157,8 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
                 sx={{
                     '& .MuiDrawer-paper': {
                         width: drawerWidth,
-                        background: theme.palette.background.default,
-                        color: theme.palette.text.primary,
+                        background: grey[100],
+                        color: "red",
                         borderRight: 'none',
                         [theme.breakpoints.up('md')]: {
                             top: '88px'

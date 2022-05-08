@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import {useState, useRef, useEffect} from 'react';
 
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import {useNavigate} from 'react-router-dom';
+import {useSelector} from 'react-redux';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import {
     Avatar,
     Box,
@@ -15,9 +15,9 @@ import {
     Divider,
     Grid,
     InputAdornment,
-    List,
+    List, ListItem, ListItemAvatar,
     ListItemButton,
-    ListItemIcon,
+    ListItemIcon, ListItemSecondaryAction,
     ListItemText,
     OutlinedInput,
     Paper,
@@ -35,9 +35,21 @@ import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
 import UpgradePlanCard from './UpgradePlanCard';
 import User1 from 'assets/images/users/user-round.svg';
+import Profile from 'assets/profile.jpg'
 
 // assets
-import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons';
+import {IconLogout, IconMenu2, IconSearch, IconSettings, IconUser} from '@tabler/icons';
+import CallIcon from '@mui/icons-material/Call';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import EmailIcon from '@mui/icons-material/Email';
+import axios from "axios";
+import PersonPinIcon from '@mui/icons-material/PersonPin';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {grey, yellow} from "@mui/material/colors";
 
 // ==============================|| PROFILE MENU ||============================== //
 
@@ -51,6 +63,35 @@ const ProfileSection = () => {
     const [notification, setNotification] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [open, setOpen] = useState(false);
+    const [product, setProduct] = useState([]);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [error, setError] = useState(null);
+    const [aalert, setAlert] = useState(false)
+    const [c, setC] = useState(0);
+    const token = localStorage.getItem('token')
+    const id = localStorage.getItem('id')
+    const url = `https://admin.allcine227.com/api/users/${id}`
+
+
+    const getData = async () => {
+        axios
+            .get(url, {
+                headers: {
+                    "name": "",
+                    "password": ""
+                }
+            })
+            .then(
+                (res) => {
+                    setProduct(res.data);
+
+                },
+                (error) => {
+                    setIsLoaded(true);
+                }
+            )
+    }
+
     /**
      * anchorRef is used on different componets and specifying one type leads to other components throwing an error
      * */
@@ -80,12 +121,23 @@ const ProfileSection = () => {
 
     const prevOpen = useRef(open);
     useEffect(() => {
+        getData()
         if (prevOpen.current === true && open === false) {
             anchorRef.current.focus();
         }
 
         prevOpen.current = open;
     }, [open]);
+    const ListItemWrapper = styled('div')(({theme}) => ({
+        cursor: 'pointer',
+        padding: 16,
+        '&:hover': {
+            background: theme.palette.primary.light
+        },
+        '& .MuiListItem-root': {
+            padding: 0
+        }
+    }));
 
     return (
         <>
@@ -111,7 +163,7 @@ const ProfileSection = () => {
                 }}
                 icon={
                     <Avatar
-                        src={User1}
+                        src={`https://admin.allcine227.com/profile/${product.imageName}`}
                         sx={{
                             ...theme.typography.mediumAvatar,
                             margin: '8px 0 8px 8px !important',
@@ -123,7 +175,7 @@ const ProfileSection = () => {
                         color="inherit"
                     />
                 }
-                label={<IconSettings stroke={1.5} size="1.5rem" color={theme.palette.primary.main} />}
+                label={<IconSettings stroke={1.5} size="1.5rem" color={theme.palette.primary.main}/>}
                 variant="outlined"
                 ref={anchorRef}
                 aria-controls={open ? 'menu-list-grow' : undefined}
@@ -149,86 +201,194 @@ const ProfileSection = () => {
                     ]
                 }}
             >
-                {({ TransitionProps }) => (
+                {({TransitionProps}) => (
                     <Transitions in={open} {...TransitionProps}>
                         <Paper>
                             <ClickAwayListener onClickAway={handleClose}>
-                                <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
-                                    <Box sx={{ p: 2 }}>
-                                        <Stack>
-                                            <Stack direction="row" spacing={0.5} alignItems="center">
-                                                <Typography variant="h4">Good Morning,</Typography>
-                                                <Typography component="span" variant="h4" sx={{ fontWeight: 400 }}>
-                                                    Johne Doe
-                                                </Typography>
-                                            </Stack>
-                                            <Typography variant="subtitle2">Project Admin</Typography>
-                                        </Stack>
-                                        <OutlinedInput
-                                            sx={{ width: '100%', pr: 1, pl: 2, my: 2 }}
-                                            id="input-search-profile"
-                                            value={value}
-                                            onChange={(e) => setValue(e.target.value)}
-                                            placeholder="Search profile options"
-                                            startAdornment={
-                                                <InputAdornment position="start">
-                                                    <IconSearch stroke={1.5} size="1rem" color={theme.palette.grey[500]} />
-                                                </InputAdornment>
-                                            }
-                                            aria-describedby="search-helper-text"
-                                            inputProps={{
-                                                'aria-label': 'weight'
+                                <MainCard border={false} elevation={16} content={false} boxShadow
+                                          shadow={theme.shadows[16]}>
+                                    <Typography sx={{
+                                        fontSize: 18,
+                                        color: 'black',
+                                        marginTop: 2,
+                                        marginLeft: 1,
+                                        fontFamily: 'arial'
+                                    }}>Profile d'utilisateur</Typography>
+
+                                    <ListItemWrapper>
+                                        <ListItem alignItems="center">
+
+                                            <ListItemAvatar>
+
+                                                <Avatar
+                                                    alt="Remy Sharp"
+                                                    src={`https://admin.allcine227.com/profile/${product.imageName}`}
+                                                    style={{alignSelf: "center"}}
+                                                    sx={{width: 80, height: 80, marginTop: 2, marginLeft: 1}}
+                                                />
+
+                                            </ListItemAvatar>
+
+                                            <ListItemText primary={<Typography sx={{
+                                                fontSize: 25,
+                                                color: 'black',
+                                                marginLeft: 1,
+                                                fontFamily: 'arial'
                                             }}
-                                        />
-                                        <Divider />
-                                    </Box>
-                                    <PerfectScrollbar style={{ height: '100%', maxHeight: 'calc(100vh - 250px)', overflowX: 'hidden' }}>
-                                        <Box sx={{ p: 2 }}>
-                                            <UpgradePlanCard />
-                                            <Divider />
-                                            <Card
-                                                sx={{
-                                                    bgcolor: theme.palette.primary.light,
-                                                    my: 2
-                                                }}
-                                            >
-                                                <CardContent>
-                                                    <Grid container spacing={3} direction="column">
-                                                        <Grid item>
-                                                            <Grid item container alignItems="center" justifyContent="space-between">
-                                                                <Grid item>
-                                                                    <Typography variant="subtitle1">Start DND Mode</Typography>
-                                                                </Grid>
-                                                                <Grid item>
-                                                                    <Switch
-                                                                        color="primary"
-                                                                        checked={sdm}
-                                                                        onChange={(e) => setSdm(e.target.checked)}
-                                                                        name="sdm"
-                                                                        size="small"
-                                                                    />
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Grid>
-                                                        <Grid item>
-                                                            <Grid item container alignItems="center" justifyContent="space-between">
-                                                                <Grid item>
-                                                                    <Typography variant="subtitle1">Allow Notifications</Typography>
-                                                                </Grid>
-                                                                <Grid item>
-                                                                    <Switch
-                                                                        checked={notification}
-                                                                        onChange={(e) => setNotification(e.target.checked)}
-                                                                        name="sdm"
-                                                                        size="small"
-                                                                    />
-                                                                </Grid>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Grid>
-                                                </CardContent>
-                                            </Card>
-                                            <Divider />
+                                                                               variant="subtitle1">{product.nom}</Typography>}
+                                                          secondary={
+                                                              <Stack direction={'row'} alignItems={'center'} gap={1}>
+                                                                  <EmailIcon sx={{marginLeft: 1}}/>
+                                                                  <Typography sx={{
+                                                                      fontSize: 16,
+                                                                      fontFamily: 'arial'
+                                                                  }}
+                                                                              variant="subtitle1">{product.email}
+                                                                  </Typography>
+                                                              </Stack>}
+                                            />
+
+
+                                        </ListItem>
+                                        <Divider/>
+                                        <ListItem alignItems="center" sx={{marginTop:2}}>
+
+                                            <ListItemAvatar>
+
+                                                <Avatar
+                                                    variant="rounded"
+                                                    sx={{
+                                                        width: 60,
+                                                        height:50,
+                                                        ...theme.typography.commonAvatar,
+                                                        transition: 'all .2s ease-in-out',
+                                                        background: grey[800],
+                                                        color: theme.palette.secondary.dark,
+                                                        '&:hover': {
+                                                            background: theme.palette.secondary.dark,
+                                                            color: theme.palette.secondary.light
+                                                        }
+                                                    }}
+                                                    color="inherit"
+                                                >
+                                                    <MonetizationOnIcon stroke={1.5} sx={{width:80,color:yellow[200]}}/>
+                                                </Avatar>
+
+                                            </ListItemAvatar>
+
+                                            <ListItemText primary={<Typography sx={{
+                                                fontSize: 22,
+                                                color: yellow[700],
+                                                marginLeft: 1,
+                                                fontFamily: 'arial'
+                                            }}
+                                                                               variant="subtitle1">Solde: {product.solde} CFA</Typography>}
+                                                          secondary={
+                                                              <Typography sx={{
+                                                                  fontSize: 16,
+                                                                  fontFamily: 'arial',
+                                                                  marginLeft: 1,
+                                                              }}
+                                                                          variant="subtitle1">{"Expire dans 24H"}
+                                                              </Typography>}/>
+
+
+                                        </ListItem>
+                                        <Divider/>
+                                        <ListItem alignItems="center" sx={{marginTop:2}}>
+
+                                            <ListItemAvatar>
+
+                                                <Avatar
+                                                    variant="rounded"
+                                                    sx={{
+                                                        width: 60,
+                                                        height:50,
+                                                        ...theme.typography.commonAvatar,
+                                                        transition: 'all .2s ease-in-out',
+                                                        background: grey[800],
+                                                        color: theme.palette.secondary.dark,
+                                                        '&:hover': {
+                                                            background: theme.palette.secondary.dark,
+                                                            color: theme.palette.secondary.light
+                                                        }
+                                                    }}
+                                                    color="inherit"
+                                                >
+                                                    <LocationOnIcon stroke={1.5} sx={{width:80,color:"white"}}/>
+                                                </Avatar>
+
+                                            </ListItemAvatar>
+
+                                            <ListItemText primary={<Typography sx={{
+                                                fontSize: 22,
+                                                marginLeft: 1,
+                                                fontFamily: 'arial'
+                                            }}
+                                                                               variant="subtitle1">Adresse</Typography>}
+                                                          secondary={
+                                                              <Typography sx={{
+                                                                  fontSize: 16,
+                                                                  fontFamily: 'arial',
+                                                                  marginLeft: 1,
+                                                              }}
+                                                                          variant="subtitle1">{product.adresse}
+                                                              </Typography>}/>
+
+
+                                        </ListItem>
+                                        <Divider/>
+                                        <ListItem alignItems="center" sx={{marginTop:2}}>
+
+                                            <ListItemAvatar>
+
+                                                <Avatar
+                                                    variant="rounded"
+                                                    sx={{
+                                                        width: 60,
+                                                        height:50,
+                                                        ...theme.typography.commonAvatar,
+                                                        transition: 'all .2s ease-in-out',
+                                                        background: grey[800],
+                                                        color: theme.palette.secondary.dark,
+                                                        '&:hover': {
+                                                            background: theme.palette.secondary.dark,
+                                                            color: theme.palette.secondary.light
+                                                        }
+                                                    }}
+                                                    color="inherit"
+                                                >
+                                                    <CallIcon stroke={1.5} sx={{width:80,color:'white'}}/>
+                                                </Avatar>
+
+                                            </ListItemAvatar>
+
+                                            <ListItemText primary={<Typography sx={{
+                                                fontSize: 22,
+                                                marginLeft: 1,
+                                                fontFamily: 'arial'
+                                            }}
+                                                                               variant="subtitle1">Telephone</Typography>}
+                                                          secondary={
+                                                              <Typography sx={{
+                                                                  fontSize: 16,
+                                                                  fontFamily: 'arial',
+                                                                  marginLeft: 1,
+                                                              }}
+                                                                          variant="subtitle1">{product.telephone}
+                                                              </Typography>}/>
+
+
+                                        </ListItem>
+
+                                    </ListItemWrapper>
+
+                                    <PerfectScrollbar style={{
+                                        height: '100%',
+                                        maxHeight: 'calc(100vh - 250px)',
+                                        overflowX: 'hidden'
+                                    }}>
+                                        <Box sx={{p: 2}}>
                                             <List
                                                 component="nav"
                                                 sx={{
@@ -245,53 +405,29 @@ const ProfileSection = () => {
                                                     }
                                                 }}
                                             >
+
                                                 <ListItemButton
-                                                    sx={{ borderRadius: `${customization.borderRadius}px` }}
+                                                    sx={{borderRadius: `${customization.borderRadius}px`}}
                                                     selected={selectedIndex === 0}
                                                     onClick={(event) => handleListItemClick(event, 0, '/user/account-profile/profile1')}
                                                 >
                                                     <ListItemIcon>
-                                                        <IconSettings stroke={1.5} size="1.3rem" />
+                                                        <IconSettings stroke={1.5} size="2.3rem"/>
                                                     </ListItemIcon>
-                                                    <ListItemText primary={<Typography variant="body2">Account Settings</Typography>} />
+                                                    <ListItemText primary={<Typography variant="body2" fontSize={18}>Parametre du
+                                                        compte</Typography>}/>
                                                 </ListItemButton>
+
                                                 <ListItemButton
-                                                    sx={{ borderRadius: `${customization.borderRadius}px` }}
-                                                    selected={selectedIndex === 1}
-                                                    onClick={(event) => handleListItemClick(event, 1, '/user/social-profile/posts')}
-                                                >
-                                                    <ListItemIcon>
-                                                        <IconUser stroke={1.5} size="1.3rem" />
-                                                    </ListItemIcon>
-                                                    <ListItemText
-                                                        primary={
-                                                            <Grid container spacing={1} justifyContent="space-between">
-                                                                <Grid item>
-                                                                    <Typography variant="body2">Social Profile</Typography>
-                                                                </Grid>
-                                                                <Grid item>
-                                                                    <Chip
-                                                                        label="02"
-                                                                        size="small"
-                                                                        sx={{
-                                                                            bgcolor: theme.palette.warning.dark,
-                                                                            color: theme.palette.background.default
-                                                                        }}
-                                                                    />
-                                                                </Grid>
-                                                            </Grid>
-                                                        }
-                                                    />
-                                                </ListItemButton>
-                                                <ListItemButton
-                                                    sx={{ borderRadius: `${customization.borderRadius}px` }}
+                                                    sx={{borderRadius: `${customization.borderRadius}px`}}
                                                     selected={selectedIndex === 4}
                                                     onClick={handleLogout}
                                                 >
                                                     <ListItemIcon>
-                                                        <IconLogout stroke={1.5} size="1.3rem" />
+                                                        <IconLogout stroke={1.5} size="2.3rem"/>
                                                     </ListItemIcon>
-                                                    <ListItemText primary={<Typography variant="body2">Logout</Typography>} />
+                                                    <ListItemText primary={<Typography
+                                                        variant="body2" fontSize={18}>Deconexion</Typography>}/>
                                                 </ListItemButton>
                                             </List>
                                         </Box>

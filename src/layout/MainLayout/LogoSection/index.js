@@ -4,15 +4,12 @@ import { Link } from 'react-router-dom';
 import { ButtonBase } from '@mui/material';
 
 // project imports
-import config from 'config';
-import Logo from 'ui-component/Logo';
+import Logo from 'assets/logo.png';
 
 // ==============================|| MAIN LOGO ||============================== //
 
 const LogoSection = () => (
-    <ButtonBase disableRipple component={Link} to={config.defaultPath}>
-        <Logo />
-    </ButtonBase>
+        <img src={Logo} width={50} />
 );
 
 export default LogoSection;

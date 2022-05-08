@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import {useState, useRef, useEffect} from 'react';
+import {Link} from 'react-router-dom';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 import {
-    Avatar,
+    Avatar, Badge,
     Box,
     Button,
     ButtonBase,
@@ -12,7 +12,7 @@ import {
     Chip,
     ClickAwayListener,
     Divider,
-    Grid,
+    Grid, List, ListItem, ListItemAvatar, ListItemSecondaryAction, ListItemText,
     Paper,
     Popper,
     Stack,
@@ -28,30 +28,31 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
 import NotificationList from './NotificationList';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
 
 // assets
-import { IconBell } from '@tabler/icons';
+import {IconBell, IconBrandTelegram} from '@tabler/icons';
+import {useAuthHeader, useAuthUser} from "react-auth-kit";
+import axios from "axios";
+import {useCart} from "react-use-cart";
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {Alert, AlertTitle} from "@mui/lab";
+
+const ListItemWrapper = styled('div')(({theme}) => ({
+    cursor: 'pointer',
+    padding: 16,
+    '&:hover': {
+        background: theme.palette.primary.light
+    },
+    '& .MuiListItem-root': {
+        padding: 0
+    }
+}));
 
 // notification status options
-const status = [
-    {
-        value: 'all',
-        label: 'All Notification'
-    },
-    {
-        value: 'new',
-        label: 'New'
-    },
-    {
-        value: 'unread',
-        label: 'Unread'
-    },
-    {
-        value: 'other',
-        label: 'Other'
-    }
-];
-
 // ==============================|| NOTIFICATION ||============================== //
 
 const NotificationSection = () => {
@@ -88,6 +89,64 @@ const NotificationSection = () => {
         if (event?.target.value) setValue(event?.target.value);
     };
 
+    const auth = useAuthUser()
+    const authHeader = useAuthHeader()
+
+
+    const [aalert, setAlert] = useState(false)
+    const [c, setC] = useState(0);
+    const url = `https://admin.allcine227.com/api/commandes`
+    const token = localStorage.getItem('token')
+    const headers = {
+        'authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+
+    const onSubmit = (e) => {
+        e.preventDefault()
+        axios
+            .post(
+                url,
+                {"panier": {items, cartTotal}},
+                {headers: headers}
+            )
+            .then((res) => {
+                if (res.status === 201) {
+                    emptyCart()
+                    setAlert(true)
+                    setTimeout(() => {
+                        setAlert(false)
+                    }, 5000);
+                } else {
+
+                }
+            }).catch(
+            function () {
+
+            })
+    }
+    const nb = (type) => {
+        return Math.floor(items.reduce((acc, arr) => acc + (arr.type === type ? 1 : 0), 0) / 5) * 500
+    }
+
+    const StyledBadge = styled(Badge)(({theme}) => ({
+        '& .MuiBadge-badge': {
+            top: 5,
+            border: `1px solid ${theme.palette.background.paper}`,
+            padding: '0 4px',
+        },
+    }));
+    const {
+        emptyCart,
+        isEmpty,
+        totalUniqueItems,
+        items,
+        updateItemQuantity,
+        removeItem,
+        cartTotal,
+    } = useCart();
+
     return (
         <>
             <Box
@@ -99,7 +158,7 @@ const NotificationSection = () => {
                     }
                 }}
             >
-                <ButtonBase sx={{ borderRadius: '12px' }}>
+                <ButtonBase sx={{borderRadius: '12px'}}>
                     <Avatar
                         variant="rounded"
                         sx={{
@@ -119,7 +178,8 @@ const NotificationSection = () => {
                         onClick={handleToggle}
                         color="inherit"
                     >
-                        <IconBell stroke={1.5} size="1.3rem" />
+                        <ShoppingCartIcon stroke={1.5} size="1.3rem"/>
+                        <IconBell/>
                     </Avatar>
                 </ButtonBase>
             </Box>
@@ -141,73 +201,139 @@ const NotificationSection = () => {
                     ]
                 }}
             >
-                {({ TransitionProps }) => (
+                {({TransitionProps}) => (
                     <Transitions position={matchesXs ? 'top' : 'top-right'} in={open} {...TransitionProps}>
                         <Paper>
                             <ClickAwayListener onClickAway={handleClose}>
-                                <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
-                                    <Grid container direction="column" spacing={2}>
-                                        <Grid item xs={12}>
-                                            <Grid container alignItems="center" justifyContent="space-between" sx={{ pt: 2, px: 2 }}>
-                                                <Grid item>
-                                                    <Stack direction="row" spacing={2}>
-                                                        <Typography variant="subtitle1">All Notification</Typography>
-                                                        <Chip
-                                                            size="small"
-                                                            label="01"
-                                                            sx={{
-                                                                color: theme.palette.background.default,
-                                                                bgcolor: theme.palette.warning.dark
-                                                            }}
-                                                        />
-                                                    </Stack>
-                                                </Grid>
-                                                <Grid item>
-                                                    <Typography component={Link} to="#" variant="subtitle2" color="primary">
-                                                        Mark as all read
-                                                    </Typography>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <PerfectScrollbar
-                                                style={{ height: '100%', maxHeight: 'calc(100vh - 205px)', overflowX: 'hidden' }}
-                                            >
-                                                <Grid container direction="column" spacing={2}>
-                                                    <Grid item xs={12}>
-                                                        <Box sx={{ px: 2, pt: 0.25 }}>
-                                                            <TextField
-                                                                id="outlined-select-currency-native"
-                                                                select
-                                                                fullWidth
-                                                                value={value}
-                                                                onChange={handleChange}
-                                                                SelectProps={{
-                                                                    native: true
-                                                                }}
-                                                            >
-                                                                {status.map((option) => (
-                                                                    <option key={option.value} value={option.value}>
-                                                                        {option.label}
-                                                                    </option>
-                                                                ))}
-                                                            </TextField>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={12} p={0}>
-                                                        <Divider sx={{ my: 0 }} />
-                                                    </Grid>
-                                                </Grid>
-                                                <NotificationList />
-                                            </PerfectScrollbar>
-                                        </Grid>
-                                    </Grid>
-                                    <Divider />
-                                    <CardActions sx={{ p: 1.25, justifyContent: 'center' }}>
-                                        <Button size="small" disableElevation>
-                                            View All
+                                <MainCard border={true} elevation={20} content={false} boxShadow
+                                          shadow={theme.shadows[16]}>
+                                    {isEmpty? <Box component="div" sx={{overflow: 'auto', fontSize: 22, marginBottom:2,marginTop:1}}>
+                                    {aalert ?<Alert variant="filled" severity="success">
+                                        <AlertTitle>Panier Envoyez avez succès</AlertTitle>
+                                        Vous recevrais votre commande le plus vite possible
+                                    </Alert>:null}
+                                    Votre panier est vide
+                                </Box>:
+                                    <>
+                                    <CardActions sx={{p: 1.25, justifyContent: 'center'}}>
+                                        <Button variant="contained" onClick={onSubmit} disableElevation
+                                                endIcon={<IconBrandTelegram stroke={1.5} size="1.3rem"/>}>
+                                            Envoyer la commande
                                         </Button>
                                     </CardActions>
+                                    <Grid container direction="column" spacing={2}>
+
+                                        <Grid item xs={12}>
+                                            <PerfectScrollbar
+                                                style={{
+                                                    height: '100%',
+                                                    maxHeight: 'calc(100vh - 205px)',
+                                                    overflowX: 'hidden'
+                                                }}
+                                            >
+                                                <List
+                                                    sx={{
+                                                        width: '100%',
+                                                        maxWidth: 330,
+                                                        py: 0,
+                                                        borderRadius: '10px',
+                                                        [theme.breakpoints.down('md')]: {
+                                                            maxWidth: 300
+                                                        },
+                                                        '& .MuiListItemSecondaryAction-root': {
+                                                            top: 22
+                                                        },
+                                                        '& .MuiDivider-root': {
+                                                            my: 0
+                                                        },
+                                                        '& .list-container': {
+                                                            pl: 7
+                                                        }
+                                                    }}
+                                                >
+                                                    <Grid container spacing={{xs: 1, md: 1}}
+                                                          columns={{xs: 12, sm: 12, md: 12}} alignContent={"center"}
+                                                          justifyContent={'center'}>
+                                                        <Grid item xs={12} sm={6} md={12}>
+                                                            <Box component="div"
+                                                                 sx={{
+                                                                     overflow: 'auto',
+                                                                     color: "black",
+                                                                     fontSize: 22,
+                                                                     marginBottom: 2,
+                                                                     marginTop: 2
+                                                                 }}>
+                                                                Prix Total {cartTotal} CFA
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+
+                                                    {items.map((item) => (
+                                                        <ListItemWrapper>
+                                                                <ListItem alignItems="center">
+
+                                                                    <ListItemAvatar>
+
+                                                                        <StyledBadge badgeContent={item.quantity}
+                                                                                     color="secondary">
+                                                                            <ShoppingCartIcon stroke={1.5}
+                                                                                              size="1.3rem"/>
+                                                                        </StyledBadge>
+
+                                                                    </ListItemAvatar>
+
+                                                                    <ListItemText primary={<Typography
+                                                                        variant="subtitle1">{item.nom}</Typography>}/>
+                                                                    <ListItemSecondaryAction>
+                                                                        <Grid container justifyContent="flex-end">
+                                                                            <Grid item xs={12} marginLeft={5}>
+                                                                                <>
+                                                                                    <RemoveIcon
+                                                                                        onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                                                                                        sx={{
+                                                                                            color: "blue",
+                                                                                            borderRadius: 3
+                                                                                        }}/>
+                                                                                    <AddIcon
+                                                                                        onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                                                                                        sx={{
+                                                                                            color: "blue",
+                                                                                            borderRadius: 3
+                                                                                        }}/>
+                                                                                    <DeleteIcon
+                                                                                        onClick={() => removeItem(item.id)}
+                                                                                        sx={{
+                                                                                            color: "red",
+                                                                                            borderRadius: 3
+                                                                                        }}/>
+                                                                                </>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    </ListItemSecondaryAction>
+                                                            </ListItem>
+                                                            <Grid container direction="column"
+                                                                  className="list-container">
+                                                                <Grid item xs={12} sx={{pb: 2}}>
+                                                                    <Typography
+                                                                        variant="subtitle2"> {item.type + ':' + item.price + " CFA"}.</Typography>
+                                                                </Grid>
+                                                                <Grid item xs={12}>
+                                                                    <Grid container>
+                                                                        <Grid item>
+
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </ListItemWrapper>
+                                                    ))}
+                                                    <Divider/>
+
+
+                                                </List> </PerfectScrollbar>
+                                        </Grid>
+                                    </Grid></>}
+                                    <Divider/>
                                 </MainCard>
                             </ClickAwayListener>
                         </Paper>
